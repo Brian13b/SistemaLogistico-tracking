@@ -31,19 +31,18 @@ sistema_tracking
 │   │   ├── geospatial.py          # (Futuro: Cálculos de distancia/velocidad)
 │   │   └── notifications.py       # (Futuro: Envío de alertas por email/SMS)
 │   ├── venv/
-│   ├── .env
 │   ├── Dockerfile
 │   ├── requeriments.txt
 │   └── main.py                    # App FastAPI
 │
 ├── tcp_server/
-│   ├── config.py
-│   ├── handlers.py
-│   ├── protocol.py
-│   ├── .env
+│   ├── app/
+│   │   ├── config.py
+│   │   ├── handlers.py
+│   │   └── protocol.py
 │   ├── Dockerfile
 │   ├── requeriments.txt
 │   └── main.py                    # Server
-│
+├── .env
 ├── docker-compose.yml
 └── estructura.txt 
