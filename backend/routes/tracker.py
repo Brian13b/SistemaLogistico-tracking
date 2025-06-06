@@ -57,7 +57,7 @@ async def obtener_historial_ubicaciones(
     db: AsyncSession = Depends(get_db)
 ):
     """Obtener historial de ubicaciones de un dispositivo"""
-    # Si no se especifican fechas, usar las últimas 24 horas
+    
     if not fecha_inicio and not fecha_fin:
         fecha_fin = datetime.utcnow()
         fecha_inicio = fecha_fin - timedelta(hours=24)
@@ -82,7 +82,7 @@ async def obtener_recorrido_vehiculo(
     db: AsyncSession = Depends(get_db)
 ):
     """Obtener el recorrido completo de un vehículo"""
-    # Si no se especifican fechas, usar las últimas 24 horas
+    
     if not fecha_inicio and not fecha_fin:
         fecha_fin = datetime.utcnow()
         fecha_inicio = fecha_fin - timedelta(hours=24)

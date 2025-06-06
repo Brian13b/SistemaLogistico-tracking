@@ -16,6 +16,7 @@ async def crear_dispositivo(
     db: AsyncSession = Depends(get_db)
 ):
     """Crear un nuevo dispositivo"""
+    
     # Verificar si ya existe un dispositivo con ese serial
     existing_dispositivo = await DispositivoService.obtener_dispositivo_por_serial(
         db, dispositivo.serial_number

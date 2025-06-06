@@ -4,7 +4,7 @@ import os
 
 class Settings(BaseSettings):
     # Database 
-    DATABASE_URL: str = "postgresql+asyncpg://user:password@db:5432/tracking_db"
+    DATABASE_URL: str = os.getenv("DATABASE_URL") or "postgresql+asyncpg://user:password@db:5432/tracking_db"
     TEST_DB_URL: Optional[str] = None
     
     # API
@@ -21,7 +21,7 @@ class Settings(BaseSettings):
         """Retorna la URL de la base de datos"""
         if os.getenv("TESTING") == "1" and self.TEST_DB_URL:
             return self.TEST_DB_URL
-        return self.DATABASE_URL  # Cambiado para usar DATABASE_URL
+        return self.DATABASE_URL
     
     class Config:
         env_file = ".env"
