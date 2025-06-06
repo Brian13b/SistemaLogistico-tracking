@@ -23,6 +23,7 @@ class GT06Server:
             while True:
                 try:
                     data = await asyncio.wait_for(reader.read(1024), timeout=30.0)
+                    logger.info(f"Raw data from {peername}: {data.hex()}") 
                     if not data:
                         logger.info(f"Client {peername} closed connection")
                         break
