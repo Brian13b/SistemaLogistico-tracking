@@ -1,12 +1,15 @@
 import os
 from pydantic_settings import BaseSettings
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class Settings(BaseSettings):
     TCP_HOST: str = os.getenv("TCP_HOST", "0.0.0.0")
     TCP_PORT: int = os.getenv("TCP_PORT", 5023)
 
-    #BACKEND_URL: str = os.getenv("BACKEND_URL", "http://localhost:8000/api/v1/tracker/data")
-    BACKEND_URL: str = os.getenv("BACKEND_URL", "https://5ab2-181-230-133-18.ngrok-free.app/api/v1/tracker/data")
+    BACKEND_URL: str = os.getenv("BACKEND_URL", "http://localhost:8002/api/v1/tracker/data")
+    #BACKEND_URL: str = os.getenv("BACKEND_URL", "https://5ab2-181-230-133-18.ngrok-free.app/api/v1/tracker/data")
 
     ALLOWED_DEVICES: list = os.getenv("ALLOWED_DEVICES", "").split(",") if os.getenv("ALLOWED_DEVICES") else []
     #ALLOWED_DEVICES: list = os.getenv("ALLOWED_DEVICES", "").split(",")
