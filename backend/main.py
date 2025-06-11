@@ -52,7 +52,11 @@ async def startup_event():
         logger.error(f"Error al iniciar la aplicación: {e}")
         raise
 
-@app.get("/api/health", tags=["health"])
+@app.get("api/health")
 async def health_check():
-    """Endpoint de verificación de salud"""
-    return {"status": "ok"}
+    """Health check para el API Gateway"""
+    return {
+        "status": "healthy",
+        "service": "tracking",
+        "timestamp": "2024-06-10T00:00:00Z"
+    }
