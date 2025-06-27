@@ -6,12 +6,13 @@ from typing import AsyncGenerator
 
 logger = logging.getLogger(__name__)
 
+print("DB URL:", settings.get_database_url())
+
 # Crear engine con la configuración apropiada
 engine = create_async_engine(
-    settings.database_url,
+    settings.get_database_url(),
     echo=settings.DEBUG,
-    pool_pre_ping=True,
-    pool_recycle=300,
+    pool_pre_ping=True
 )
 
 # Session factory

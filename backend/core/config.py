@@ -7,7 +7,7 @@ load_dotenv()
 
 class Settings(BaseSettings):
     # Database 
-    DATABASE_URL: str = os.getenv("DATABASE_URL") or "postgresql+asyncpg://user:password@db:5432/tracking_db"
+    URL_DATABASE: str = "postgresql+asyncpg://postgres:admin@localhost:5432/tracking_db"
     TEST_DB_URL: Optional[str] = None
     
     # API
@@ -19,12 +19,10 @@ class Settings(BaseSettings):
     # Logging
     LOG_LEVEL: str = "INFO"
     
-    @property
-    def database_url(self) -> str:
-        """Retorna la URL de la base de datos"""
+    def get_database_url(self) -> str:
         if os.getenv("TESTING") == "1" and self.TEST_DB_URL:
             return self.TEST_DB_URL
-        return self.DATABASE_URL
+        return self.URL_DATABASE
     
     class Config:
         env_file = ".env"

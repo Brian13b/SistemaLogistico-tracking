@@ -8,7 +8,7 @@ class Vehiculo(Base):
     __tablename__ = "vehiculos"
     
     id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
-    placa = Column(String, unique=True, nullable=False, index=True)
+    patente = Column(String, unique=True, nullable=False, index=True)
     marca = Column(String)
     modelo = Column(String)
     year = Column(String)
