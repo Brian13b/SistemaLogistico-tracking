@@ -52,7 +52,7 @@ async def startup_event():
         logger.error(f"Error al iniciar la aplicación: {e}")
         raise
 
-@app.get("api/health")
+@app.get("/health")
 async def health_check():
     """Health check para el API Gateway"""
     return {

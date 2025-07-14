@@ -1,0 +1,14 @@
+# Archivos de entorno con variables sensibles
+.env
+.env.*
+venv/
+
+# Archivos de configuración
+config.*
+settings.*
+
+# Archivos de caché
+.cache
+
+# Archivos de logs
+*.log

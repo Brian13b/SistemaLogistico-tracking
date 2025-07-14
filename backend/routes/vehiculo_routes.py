@@ -15,12 +15,12 @@ async def crear_vehiculo(
     db: AsyncSession = Depends(get_db)
 ):
     """Crear un nuevo vehículo"""
-    # Verificar si ya existe un vehículo con esa placa
-    existing_vehiculo = await VehiculoService.obtener_vehiculo_por_placa(db, vehiculo.placa)
+    # Verificar si ya existe un vehículo con esa patente
+    existing_vehiculo = await VehiculoService.obtener_vehiculo_por_patente(db, vehiculo.patente)
     if existing_vehiculo:
         raise HTTPException(
             status_code=400,
-            detail=f"Ya existe un vehículo con la placa {vehiculo.placa}"
+            detail=f"Ya existe un vehículo con la patente {vehiculo.patente}"
         )
     
     return await VehiculoService.crear_vehiculo(db, vehiculo)
@@ -57,13 +57,13 @@ async def obtener_vehiculo_completo(
         raise HTTPException(status_code=404, detail="Vehículo no encontrado")
     return vehiculo
 
-@router.get("/placa/{placa}", response_model=VehiculoResponse)
-async def obtener_vehiculo_por_placa(
-    placa: str,
+@router.get("/patente/{patente}", response_model=VehiculoResponse)
+async def obtener_vehiculo_por_patente(
+    patente: str,
     db: AsyncSession = Depends(get_db)
 ):
-    """Obtener vehículo por placa"""
-    vehiculo = await VehiculoService.obtener_vehiculo_por_placa(db, placa)
+    """Obtener vehículo por patente"""
+    vehiculo = await VehiculoService.obtener_vehiculo_por_patente(db, patente)
     if not vehiculo:
         raise HTTPException(status_code=404, detail="Vehículo no encontrado")
     return vehiculo
@@ -80,13 +80,13 @@ async def actualizar_vehiculo(
     if not vehiculo_existente:
         raise HTTPException(status_code=404, detail="Vehículo no encontrado")
     
-    # Si se está actualizando la placa, verificar que no exista otra igual
-    if vehiculo_update.placa and vehiculo_update.placa != vehiculo_existente.placa:
-        placa_existente = await VehiculoService.obtener_vehiculo_por_placa(db, vehiculo_update.placa)
-        if placa_existente:
+    # Si se está actualizando la patente, verificar que no exista otra igual
+    if vehiculo_update.patente and vehiculo_update.patente != vehiculo_existente.patente:
+        patente_existente = await VehiculoService.obtener_vehiculo_por_patente(db, vehiculo_update.patente)
+        if patente_existente:
             raise HTTPException(
                 status_code=400,
-                detail=f"Ya existe un vehículo con la placa {vehiculo_update.placa}"
+                detail=f"Ya existe un vehículo con la patente {vehiculo_update.patente}"
             )
     
     vehiculo_actualizado = await VehiculoService.actualizar_vehiculo(db, vehiculo_id, vehiculo_update)

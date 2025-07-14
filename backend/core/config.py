@@ -7,7 +7,7 @@ load_dotenv()
 
 class Settings(BaseSettings):
     # Database 
-    URL_DATABASE: str = "postgresql+asyncpg://postgres:admin@localhost:5432/tracking_db"
+    URL_DATABASE: str = os.getenv("DATABASE_URL")
     TEST_DB_URL: Optional[str] = None
     
     # API

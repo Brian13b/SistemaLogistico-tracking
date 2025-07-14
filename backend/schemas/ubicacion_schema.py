@@ -35,7 +35,7 @@ class UbicacionTracker(BaseModel):
 class RutaResponse(BaseModel):
     """Respuesta para consultas de rutas/recorridos"""
     dispositivo_id: str
-    vehiculo_placa: Optional[str]
+    vehiculo_patente: Optional[str]
     ubicaciones: list[UbicacionResponse]
     total_puntos: int
     distancia_total: Optional[float] = None  # en km

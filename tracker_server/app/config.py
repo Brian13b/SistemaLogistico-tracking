@@ -5,18 +5,24 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class Settings(BaseSettings):
+    # Configuración del servidor TCP
     TCP_HOST: str = os.getenv("TCP_HOST", "0.0.0.0")
-    TCP_PORT: int = os.getenv("TCP_PORT", 5023)
-
+    TCP_PORT: int = int(os.getenv("TCP_PORT", 5023))
+    
+    # Configuración del backend
     BACKEND_URL: str = os.getenv("BACKEND_URL", "http://localhost:8002/api/v1/tracker/data")
-    #BACKEND_URL: str = os.getenv("BACKEND_URL", "https://5ab2-181-230-133-18.ngrok-free.app/api/v1/tracker/data")
-
-    ALLOWED_DEVICES: list = os.getenv("ALLOWED_DEVICES", "").split(",") if os.getenv("ALLOWED_DEVICES") else []
-    #ALLOWED_DEVICES: list = os.getenv("ALLOWED_DEVICES", "").split(",")
+    API_KEY: str = os.getenv("API_KEY", "")
+    BACKEND_TIMEOUT: int = int(os.getenv("BACKEND_TIMEOUT", 5))
     
-    BACKEND_TIMEOUT: int = 5  # segundos
+    # Dispositivos permitidos
+    ALLOWED_DEVICES: list = [
+        dev.strip() for dev in os.getenv("ALLOWED_DEVICES", "").split(",") 
+        if dev.strip()
+    ]
     
-    NGROK_VERIFY_SSL: bool = os.getenv("NGROK_VERIFY_SSL", "false").lower() == "true"  # Para desarrollo puede ser False
+    # Configuración adicional
+    LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
+    BUFFER_SIZE: int = int(os.getenv("BUFFER_SIZE", 1024))
 
     class Config:
         env_file = ".env"

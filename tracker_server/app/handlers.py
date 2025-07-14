@@ -7,64 +7,61 @@ from app.config import settings
 logger = logging.getLogger(__name__)
 
 async def send_to_backend(data: dict) -> bool:
-    """
-    Versión robusta para conexión a backend a través de ngrok
-    """
-    if not data:
-        logger.debug("Ignorando datos no GPS")
+    """Envía datos al backend con manejo robusto de errores"""
+    if not data or data.get('type') != 'gps':
+        logger.debug("Datos no GPS ignorados")
         return False
 
-    payload = {
-        "device_id": data["device_id"],
-        "lat": round(float(data["lat"]), 6),
-        "lng": round(float(data["lng"]), 6),
-        "speed": int(data["speed"]),
-        "course": int(data["course"]),
-        "altitude": int(data.get("altitude", 0)),
-        "accuracy": int(data.get("accuracy", 5)),
-        "timestamp": datetime.now(timezone.utc).isoformat()
-    }
+    try:
+        # Preparar payload con formato consistente
+        payload = {
+            "device_id": data["device_id"],
+            "lat": data["lat"],
+            "lng": data["lng"],
+            "speed": data["speed"],
+            "course": data["course"],
+            "altitude": data.get("altitude", 0),
+            "accuracy": data.get("accuracy", 5),
+            "timestamp": data.get("timestamp", datetime.now(timezone.utc).isoformat())
+        }
 
-    headers = {
-        "Content-Type": "application/json",
-        "User-Agent": "GT06-Tracker-Server/1.0"
-    }
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {settings.API_KEY}" if settings.API_KEY else None
+        }
 
-    connector = aiohttp.TCPConnector(
-        ssl=settings.NGROK_VERIFY_SSL,
-        force_close=True
-    )
+        async with aiohttp.ClientSession() as session:
+            for attempt in range(3):
+                try:
+                    async with session.post(
+                        settings.BACKEND_URL,
+                        json=payload,
+                        headers=headers,
+                        timeout=aiohttp.ClientTimeout(total=settings.BACKEND_TIMEOUT)
+                    ) as response:
+                        
+                        if response.status == 201:
+                            logger.info("Datos enviados correctamente")
+                            return True
+                            
+                        error = await response.text()
+                        logger.error(f"Intento {attempt+1} fallido. Status: {response.status}. Error: {error}")
+                        
+                        # No reintentar para errores clientes (4xx)
+                        if 400 <= response.status < 500:
+                            break
 
-    for attempt in range(3):  # 3 intentos
-        try:
-            async with aiohttp.ClientSession(connector=connector) as session:
-                async with session.post(
-                    settings.BACKEND_URL,
-                    json=payload,
-                    headers=headers,
-                    timeout=aiohttp.ClientTimeout(total=settings.BACKEND_TIMEOUT)
-                ) as response:
-                    
-                    if response.status == 201:
-                        logger.info("Datos enviados exitosamente al backend")
-                        return True
-                    
-                    error_detail = await response.text()
-                    logger.error(f"Intento {attempt+1} fallido. Status: {response.status}. Error: {error_detail}")
-                    
-                    # No reintentar para errores 4xx (excepto 429)
-                    if 400 <= response.status < 500 and response.status != 429:
-                        break
-
-        except asyncio.TimeoutError:
-            logger.error(f"Timeout en intento {attempt+1} (>{settings.BACKEND_TIMEOUT}s)")
-        except aiohttp.ClientConnectorError as e:
-            logger.error(f"Error de conexión en intento {attempt+1}: {str(e)}")
-        except Exception as e:
-            logger.error(f"Error inesperado en intento {attempt+1}: {str(e)}")
+                except asyncio.TimeoutError:
+                    logger.error(f"Timeout en intento {attempt+1}")
+                except Exception as e:
+                    logger.error(f"Error en intento {attempt+1}: {str(e)}")
+                
+                if attempt < 2:
+                    await asyncio.sleep(1)
         
-        if attempt < 2:  # Esperar solo entre intentos
-            await asyncio.sleep(1)
-    
-    logger.error(f"Fallo después de 3 intentos. Payload no enviado: {payload}")
-    return False
+        logger.error(f"Fallo después de 3 intentos. Payload: {payload}")
+        return False
+
+    except Exception as e:
+        logger.error(f"Error inesperado: {str(e)}")
+        return False

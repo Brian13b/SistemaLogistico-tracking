@@ -17,20 +17,20 @@ class GT06Server:
 
     async def handle_client(self, reader, writer):
         peername = writer.get_extra_info('peername')
-        logger.info(f"Connection from {peername}")
+        logger.info(f"Conexión desde {peername}")
 
         try:
             while True:
                 try:
                     data = await asyncio.wait_for(reader.read(1024), timeout=30.0)
-                    logger.info(f"Raw data from {peername}: {data.hex()}") 
+                    logger.info(f"Datos en bruto de {peername}: {data.hex()}") 
                     if not data:
-                        logger.info(f"Client {peername} closed connection")
+                        logger.info(f"El cliente {peername} cerró la conexión")
                         break
 
                     # Validación básica del paquete
                     if len(data) < 8 or data[0] != 0x78 or data[1] != 0x78:
-                        logger.warning(f"Invalid packet from {peername}")
+                        logger.warning(f"Paquete no válido de {peername}")
                         break
 
                     protocol = data[3]
@@ -38,22 +38,22 @@ class GT06Server:
 
                     # Verificar dispositivo permitido
                     if settings.ALLOWED_DEVICES and device_id not in settings.ALLOWED_DEVICES:
-                        logger.warning(f"Unauthorized device: {device_id}")
+                        logger.warning(f"Dispositivo no autorizado: {device_id}")
                         break
                     else:
-                        logger.info(f"Processing data from device: {device_id}")
+                        logger.info(f"Procesando datos del dispositivo: {device_id}")
 
                     # Procesar según tipo de paquete
                     if protocol == 0x01:  # Login
                         packet = self.parser.parse_login(data)
-                        logger.info(f"Login from {device_id}")
+                        logger.info(f"Inicio de sesión desde {device_id}")
                         ack = self.parser.create_ack(device_id, data[8])
                         writer.write(ack)
                         
                     elif protocol in (0x10, 0x12, 0x16, 0x22):  # GPS/Alarm
                         packet = self.parser.parse_gps(data)
                         if packet:
-                            logger.info(f"GPS data from {device_id}")
+                            logger.info(f"Datos GPS de {device_id}")
                             
                             backend_data = {
                                 "device_id": device_id,
@@ -69,39 +69,39 @@ class GT06Server:
                             try:
                                 success = await send_to_backend(backend_data)
                                 if not success:
-                                    logger.error(f"Failed to send data to backend. Payload: {backend_data}")
+                                    logger.error(f"No se pudo enviar datos al backend. Contenido: {backend_data}")
                             except Exception as e:
-                                logger.error(f"Critical error sending to backend: {str(e)}")
+                                logger.error(f"Error crítico al enviar al backend: {str(e)}")
                                 break
                         
                         ack = self.parser.create_ack(device_id, data[8])
                         writer.write(ack)
                         
                     else:
-                        logger.warning(f"Unknown protocol: {protocol}")
+                        logger.warning(f"Protocolo desconocido: {protocol}")
                         continue
 
                     await writer.drain()
 
                 except asyncio.TimeoutError:
-                    logger.warning(f"Timeout with {peername}")
+                    logger.warning(f"Tiempo de espera agotado con {peername}")
                     break
                 except ConnectionResetError:
-                    logger.warning(f"Client {peername} reset connection")
+                    logger.warning(f"Cliente {peername} reinicializó la conexión")
                     break
                 except Exception as e:
-                    logger.error(f"Error processing data from {peername}: {str(e)}")
+                    logger.error(f"Error al procesar los datos de {peername}: {str(e)}")
                     break
 
         except Exception as e:
-            logger.error(f"Unexpected error with {peername}: {str(e)}")
+            logger.error(f"Error inesperado con {peername}: {str(e)}")
         finally:
             try:
                 writer.close()
                 await asyncio.wait_for(writer.wait_closed(), timeout=2.0)
             except Exception:
                 pass
-            logger.info(f"Connection closed: {peername}")
+            logger.info(f"Conexión terminada: {peername}")
 
     async def run(self):
         server = await asyncio.start_server(
@@ -109,7 +109,7 @@ class GT06Server:
             settings.TCP_HOST,
             settings.TCP_PORT
         )
-        logger.info(f"Server running on {settings.TCP_HOST}:{settings.TCP_PORT}")
+        logger.info(f"Servidor corriendo en {settings.TCP_HOST}:{settings.TCP_PORT}")
 
         async with server:
             await server.serve_forever()
@@ -119,6 +119,6 @@ if __name__ == "__main__":
     try:
         asyncio.run(server.run())
     except KeyboardInterrupt:
-        logger.info("Server stopped by user")
+        logger.info("El usuario detuvo el servidor")
     except Exception as e:
-        logger.error(f"Server crashed: {str(e)}")
+        logger.error(f"Fallo del servidor: {str(e)}")

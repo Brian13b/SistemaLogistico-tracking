@@ -20,4 +20,4 @@ class Vehiculo(Base):
     dispositivos = relationship("Dispositivo", back_populates="vehiculo", cascade="all, delete-orphan")
     
     def __repr__(self):
-        return f"<Vehiculo(id={self.id}, placa={self.placa})>"
+        return f"<Vehiculo(id={self.id}, patente={self.patente})>"

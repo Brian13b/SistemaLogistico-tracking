@@ -18,7 +18,7 @@ class VehiculoService:
             db.add(nuevo_vehiculo)
             await db.commit()
             await db.refresh(nuevo_vehiculo)
-            logger.info(f"Vehículo creado: {nuevo_vehiculo.placa}")
+            logger.info(f"Vehículo creado: {nuevo_vehiculo.patente}")
             return nuevo_vehiculo
         except Exception as e:
             await db.rollback()
@@ -33,9 +33,9 @@ class VehiculoService:
         return result.scalar_one_or_none()
     
     @staticmethod
-    async def obtener_vehiculo_por_placa(db: AsyncSession, placa: str) -> Optional[Vehiculo]:
-        """Obtener vehículo por placa"""
-        stmt = select(Vehiculo).where(Vehiculo.placa == placa)
+    async def obtener_vehiculo_por_patente(db: AsyncSession, patente: str) -> Optional[Vehiculo]:
+        """Obtener vehículo por patente"""
+        stmt = select(Vehiculo).where(Vehiculo.patente == patente)
         result = await db.execute(stmt)
         return result.scalar_one_or_none()
     
@@ -50,7 +50,7 @@ class VehiculoService:
         stmt = select(Vehiculo)
         if activos_solo:
             stmt = stmt.where(Vehiculo.activo == True)
-        stmt = stmt.offset(skip).limit(limit).order_by(Vehiculo.placa)
+        stmt = stmt.offset(skip).limit(limit).order_by(Vehiculo.patente)
         result = await db.execute(stmt)
         return result.scalars().all()
     

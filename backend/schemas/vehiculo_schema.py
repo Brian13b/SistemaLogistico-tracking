@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import Optional, List
 
 class VehiculoBase(BaseModel):
-    placa: str = Field(..., description="Placa del vehículo", max_length=10)
+    patente: str = Field(..., description="Patente del vehículo", max_length=10)
     marca: Optional[str] = Field(None, description="Marca del vehículo", max_length=50)
     modelo: Optional[str] = Field(None, description="Modelo del vehículo", max_length=50)
     year: Optional[str] = Field(None, description="Año del vehículo", max_length=4)
@@ -13,7 +13,7 @@ class VehiculoCreate(VehiculoBase):
     pass
 
 class VehiculoUpdate(BaseModel):
-    placa: Optional[str] = Field(None, max_length=10)
+    patente: Optional[str] = Field(None, max_length=10)
     marca: Optional[str] = Field(None, max_length=50)
     modelo: Optional[str] = Field(None, max_length=50)
     year: Optional[str] = Field(None, max_length=4)

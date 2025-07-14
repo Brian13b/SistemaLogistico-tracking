@@ -127,7 +127,7 @@ class UbicacionService:
             
             return RutaResponse(
                 dispositivo_id=dispositivos_ids[0] if dispositivos_ids else "",
-                vehiculo_placa=vehiculo.placa,
+                vehiculo_patente=vehiculo.patente,
                 ubicaciones=ubicaciones,
                 total_puntos=len(ubicaciones),
                 distancia_total=distancia_total,
@@ -157,7 +157,7 @@ class UbicacionService:
             stmt = select(
                 Ubicacion,
                 Dispositivo.serial_number,
-                Vehiculo.placa
+                Vehiculo.patente
             ).select_from(
                 Ubicacion.join(
                     subquery,
@@ -171,11 +171,11 @@ class UbicacionService:
             result = await db.execute(stmt)
             ubicaciones_tiempo_real = []
             
-            for ubicacion, serial, placa in result:
+            for ubicacion, serial, patente in result:
                 ubicaciones_tiempo_real.append({
                     "ubicacion": ubicacion,
                     "dispositivo_serial": serial,
-                    "vehiculo_placa": placa
+                    "vehiculo_patente": patente
                 })
             
             return ubicaciones_tiempo_real
