@@ -23,6 +23,8 @@ class GT06ProtocolParser:
         try:
             # ID del dispositivo (8 bytes ASCII)
             device_id = data[4:12].decode('ascii', errors='ignore').strip()
+            if not device_id:
+                raise ValueError("Device ID vacío")
             
             # Fecha y hora (6 bytes)
             year = 2000 + data[12]
@@ -33,8 +35,8 @@ class GT06ProtocolParser:
             second = data[17]
             
             # Coordenadas (4 bytes cada una, big-endian, con signo)
-            lat = struct.unpack('>i', data[18:22])[0] / 1800000.0
-            lng = struct.unpack('>i', data[22:26])[0] / 1800000.0
+            lat = struct.unpack('>i', data[18:22])[0] / 1000000.0
+            lng = struct.unpack('>i', data[22:26])[0] / 1000000.0
             
             # Validar coordenadas
             lat = max(min(lat, 90.0), -90.0)
@@ -65,14 +67,14 @@ class GT06ProtocolParser:
                 ).isoformat() + "Z"
             }
         except Exception as e:
-            raise ValueError(f"Error parsing GPS data: {str(e)}")
+            raise ValueError(f"Error al convertir datos GPS: {str(e)}")
 
     @staticmethod
     def create_ack(device_id: str, packet_number: int) -> bytes:
         """Crea paquete de confirmación (ACK)"""
         return (
             bytes.fromhex("78780501") + 
-            device_id.encode('ascii').ljust(8, b'\x00')[:8] + 
+            device_id.encode('ascii')[:8] + 
             bytes([packet_number]) + 
             bytes.fromhex("000D0A")
         )

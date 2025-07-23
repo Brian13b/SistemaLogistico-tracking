@@ -34,7 +34,7 @@ class GT06Server:
                         break
 
                     protocol = data[3]
-                    device_id = data[4:8].hex()
+                    device_id = data[4:12].decode('ascii', errors='ignore').strip()
 
                     # Verificar dispositivo permitido
                     if settings.ALLOWED_DEVICES and device_id not in settings.ALLOWED_DEVICES:

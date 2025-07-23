@@ -9,6 +9,8 @@ settings.*
 
 # Archivos de caché
 .cache
+*.pyc
+__pycache__/
 
 # Archivos de logs
 *.log
