@@ -23,7 +23,7 @@ class GT06Server:
             while True:
                 try:
                     data = await asyncio.wait_for(reader.read(1024), timeout=30.0)
-                    logger.info(f"Datos en bruto de {peername}: {data.hex()}") 
+                    
                     if not data:
                         logger.info(f"El cliente {peername} cerró la conexión")
                         break
@@ -38,23 +38,21 @@ class GT06Server:
 
                     # Verificar dispositivo permitido
                     if settings.ALLOWED_DEVICES and device_id not in settings.ALLOWED_DEVICES:
-                        logger.warning(f"Dispositivo no autorizado: {device_id}")
+                        logger.warning(f"Dispositivo no autorizado: [oculto]")
                         break
                     else:
-                        logger.info(f"Procesando datos del dispositivo: {device_id}")
+                        logger.info(f"Procesando datos de un dispositivo autorizado")
 
                     # Procesar según tipo de paquete
                     if protocol == 0x01:  # Login
                         packet = self.parser.parse_login(data)
-                        logger.info(f"Inicio de sesión desde {device_id}")
+                        logger.info(f"Inicio de sesión de un dispositivo autorizado")
                         ack = self.parser.create_ack(device_id, data[8])
                         writer.write(ack)
                         
                     elif protocol in (0x10, 0x12, 0x16, 0x22):  # GPS/Alarm
                         packet = self.parser.parse_gps(data)
                         if packet:
-                            logger.info(f"Datos GPS de {device_id}")
-                            
                             backend_data = {
                                 "device_id": device_id,
                                 "lat": packet["lat"],
@@ -62,21 +60,19 @@ class GT06Server:
                                 "speed": packet["speed"],
                                 "course": packet["course"],
                                 "altitude": packet.get("altitude", 0),
-                                "accuracy": packet.get("accuracy", 5),  # Cambiado de 0 a 5 como valor por defecto
+                                "accuracy": packet.get("accuracy", 5),  
                                 "timestamp": datetime.now(timezone.utc).isoformat()
                             }
                             
                             try:
                                 success = await send_to_backend(backend_data)
                                 if not success:
-                                    logger.error(f"No se pudo enviar datos al backend. Contenido: {backend_data}")
+                                    logger.error(f"No se pudo enviar datos al backend")
                             except Exception as e:
                                 logger.error(f"Error crítico al enviar al backend: {str(e)}")
                                 break
-                        
                         ack = self.parser.create_ack(device_id, data[8])
                         writer.write(ack)
-                        
                     else:
                         logger.warning(f"Protocolo desconocido: {protocol}")
                         continue

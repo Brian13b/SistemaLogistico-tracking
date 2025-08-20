@@ -34,9 +34,9 @@ async def send_to_backend(data: dict) -> bool:
         if settings.API_KEY and settings.API_KEY.strip():
             headers["Authorization"] = f"Bearer {settings.API_KEY.strip()}"
 
-        logger.debug(f"Enviando al backend - URL: {settings.BACKEND_URL}")
-        logger.debug(f"Headers: {headers}")
-        logger.debug(f"Payload: {payload}")
+        # logger.debug(f"Enviando al backend - URL: {settings.BACKEND_URL}")
+        # logger.debug(f"Headers: {headers}")
+        # logger.debug(f"Payload: {payload}")
 
         async with aiohttp.ClientSession() as session:
             for attempt in range(3):
@@ -66,7 +66,7 @@ async def send_to_backend(data: dict) -> bool:
                 if attempt < 2:
                     await asyncio.sleep(1)
         
-        logger.error(f"Fallo después de 3 intentos. Payload: {payload}")
+        logger.error(f"Fallo después de 3 intentos.")
         return False
 
     except Exception as e:
