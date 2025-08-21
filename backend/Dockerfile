@@ -1,8 +1,8 @@
-# Imagen de Python 3.11
+# Imagen de Python 3.13
 FROM python:3.11-slim
 
 # Establecer el directorio de trabajo
-WORKDIR /app
+WORKDIR /
 
 # Instalar dependencias del sistema
 RUN apt-get update && \

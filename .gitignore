@@ -1,7 +1,8 @@
 # Archivos de entorno con variables sensibles
 .env
 .env.*
-venv/
+backend/venv/
+tracker_server/venv/
 
 # Archivos de configuración
 config.*
