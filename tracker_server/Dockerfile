@@ -1,14 +1,8 @@
 # Imagen de Python 3.13 Slim
-FROM python:3.11-slim
+FROM python:3.13-slim
 
 # Establecer el directorio de trabajo
 WORKDIR /app
-
-# Instalar dependencias del sistema (solo las necesarias)
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    build-essential && \
-    rm -rf /var/lib/apt/lists/*
 
 # Instalar dependencias de Python
 COPY requirements.txt .
