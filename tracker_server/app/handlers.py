@@ -42,7 +42,7 @@ async def send_to_backend(data: dict) -> bool:
             for attempt in range(3):
                 try:
                     async with session.post(
-                        settings.BACKEND_URL,
+                        settings.BACKEND_URL_TRACKING,
                         json=payload,
                         headers=headers,
                         timeout=aiohttp.ClientTimeout(total=settings.BACKEND_TIMEOUT)

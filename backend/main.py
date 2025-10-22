@@ -18,7 +18,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Cargar variables de entorno
-env_path = Path(__file__).resolve().parents[1] / '.env'
+env_path = Path(__file__).resolve().parent.parent / '.env'
 load_dotenv(env_path)
 
 app = FastAPI(
