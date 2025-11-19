@@ -18,7 +18,8 @@ else:
 engine = create_async_engine(
     database_url, 
     echo=settings.DEBUG,
-    pool_pre_ping=True
+    pool_pre_ping=True,
+    connect_args={"ssl": "require"}
 )
 
 # Session factory
