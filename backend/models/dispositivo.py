@@ -8,7 +8,7 @@ class Dispositivo(Base):
     __tablename__ = "dispositivos"
     
     id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
-    serial_number = Column(String, unique=True, nullable=False, index=True)
+    imei = Column(String, unique=True, nullable=False, index=True)
     modelo = Column(String, default="CY06")
     vehiculo_id = Column(String, ForeignKey("vehiculos.id"), nullable=True)
     activo = Column(Boolean, default=True)

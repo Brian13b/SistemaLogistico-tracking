@@ -24,7 +24,7 @@ async def crear_dispositivo(
     if existing_dispositivo:
         raise HTTPException(
             status_code=400,
-            detail=f"Ya existe un dispositivo con el serial {dispositivo.serial_number}"
+            detail=f"Ya existe un dispositivo con el IMEI {dispositivo.imei}"
         )
     
     # Si se asigna a un vehículo, verificar que exista
@@ -110,15 +110,15 @@ async def actualizar_dispositivo(
         raise HTTPException(status_code=404, detail="Dispositivo no encontrado")
     
     # Si se está actualizando el serial, verificar que no exista otro igual
-    if (dispositivo_update.serial_number and 
-        dispositivo_update.serial_number != dispositivo_existente.serial_number):
+    if (dispositivo_update.imei and 
+        dispositivo_update.imei != dispositivo_existente.imei):
         serial_existente = await DispositivoService.obtener_dispositivo_por_serial(
-            db, dispositivo_update.serial_number
+            db, dispositivo_update.imei
         )
         if serial_existente:
             raise HTTPException(
                 status_code=400,
-                detail=f"Ya existe un dispositivo con el serial {dispositivo_update.serial_number}"
+                detail=f"Ya existe un dispositivo con el serial {dispositivo_update.imei}"
             )
     
     # Si se está asignando a un vehículo, verificar que exista

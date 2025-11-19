@@ -18,7 +18,7 @@ class DispositivoService:
             db.add(nuevo_dispositivo)
             await db.commit()
             await db.refresh(nuevo_dispositivo)
-            logger.info(f"Dispositivo creado: {nuevo_dispositivo.serial_number}")
+            logger.info(f"Dispositivo creado: {nuevo_dispositivo.imei}")
             return nuevo_dispositivo
         except Exception as e:
             await db.rollback()
@@ -35,7 +35,7 @@ class DispositivoService:
     @staticmethod
     async def obtener_dispositivo_por_serial(db: AsyncSession, serial_number: str) -> Optional[Dispositivo]:
         """Obtener dispositivo por número de serie"""
-        stmt = select(Dispositivo).where(Dispositivo.serial_number == serial_number)
+        stmt = select(Dispositivo).where(Dispositivo.imei == serial_number)
         result = await db.execute(stmt)
         return result.scalar_one_or_none()
     
@@ -50,7 +50,7 @@ class DispositivoService:
         stmt = select(Dispositivo)
         if activos_solo:
             stmt = stmt.where(Dispositivo.activo == True)
-        stmt = stmt.offset(skip).limit(limit).order_by(Dispositivo.serial_number)
+        stmt = stmt.offset(skip).limit(limit).order_by(Dispositivo.imei)
         result = await db.execute(stmt)
         return result.scalars().all()
     

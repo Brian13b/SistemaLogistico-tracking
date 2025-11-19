@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     TCP_PORT: int = int(os.getenv("TCP_PORT", 5023))
     
     # Configuración del backend
-    BACKEND_URL_TRACKING: str = os.getenv("BACKEND_URL_TRACKING", "http://localhost:8002/api/v1/tracker/data")
+    BACKEND_URL_TRACKING: str = os.getenv("BACKEND_URL_TRACKING", "https://sistemalogistico-tracking.onrender.com:8002/api/v1/tracker/data")
     API_KEY: str = os.getenv("API_KEY", "")
     BACKEND_TIMEOUT: int = int(os.getenv("BACKEND_TIMEOUT", 5))
     
