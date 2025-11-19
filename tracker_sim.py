@@ -109,7 +109,6 @@ def simular_vehiculo(imei: str, patente: str, host: str, port: int):
             lat += random.uniform(-0.01, 0.01)
             lng += random.uniform(-0.01, 0.01)
             
-            # --- AQUÍ ESTABA EL ERROR: El while debe estar DENTRO del with ---
             while True:
                 last_lat, last_lng = lat, lng
                 
@@ -153,8 +152,6 @@ def haversine(lon1, lat1, lon2, lat2):
     return c * r
 
 if __name__ == "__main__":
-    # TU IPV6 DE FLY.IO (Pégala aquí entre comillas)
-    # Ejemplo: "2a09:8280:1::b1:d850:0"
     HOST_NUBE = "sistema-tracking-tcp.fly.dev" 
     PUERTO_NUBE = 443
 

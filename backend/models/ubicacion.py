@@ -15,7 +15,7 @@ class Ubicacion(Base):
     rumbo = Column("direccion", Float)  # grados (0-360)
     altitud = Column(Float)  # metros
     precision = Column(Float)  # metros
-    estado_motor = Column(Integer, default=0)  # 0: apagado, 1: encendido
+    #estado_motor = Column(Integer, default=0)  # 0: apagado, 1: encendido
     timestamp = Column(DateTime(timezone=True), server_default=func.now(), index=True)
     
     # Relaciones
