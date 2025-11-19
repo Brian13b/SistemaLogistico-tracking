@@ -12,7 +12,7 @@ class Ubicacion(Base):
     latitud = Column(Float, nullable=False)
     longitud = Column(Float, nullable=False)
     velocidad = Column(Float, default=0.0)  # km/h
-    rumbo = Column(Float)  # grados (0-360)
+    rumbo = Column("direccion", Float)  # grados (0-360)
     altitud = Column(Float)  # metros
     precision = Column(Float)  # metros
     estado_motor = Column(Integer, default=0)  # 0: apagado, 1: encendido
