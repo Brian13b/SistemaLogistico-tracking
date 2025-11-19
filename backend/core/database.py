@@ -6,11 +6,17 @@ from typing import AsyncGenerator
 
 logger = logging.getLogger(__name__)
 
-print("DB URL:", settings.get_database_url())
+original_url = settings.get_database_url()
 
-# Crear engine con la configuración apropiada
+if original_url and original_url.startswith("postgres://"):
+    database_url = original_url.replace("postgres://", "postgresql+asyncpg://", 1)
+elif original_url and original_url.startswith("postgresql://"):
+    database_url = original_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+else:
+    database_url = original_url
+
 engine = create_async_engine(
-    settings.get_database_url(),
+    database_url, 
     echo=settings.DEBUG,
     pool_pre_ping=True
 )
@@ -24,6 +30,7 @@ AsyncSessionLocal = async_sessionmaker(
 
 # Base para los modelos
 Base = declarative_base()
+
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """Dependency para obtener sesión de base de datos"""
     async with AsyncSessionLocal() as session:
@@ -35,13 +42,19 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
             raise
         finally:
             await session.close()
-            await session.close()
 
 async def init_db():
     """Inicializar base de datos"""
     async with engine.begin() as conn:
         # Importar todos los modelos para que SQLAlchemy los reconozca
-        from models import vehiculo, dispositivo, ubicacion
+        # Asegúrate de que estos imports sean correctos según tu estructura de carpetas
+        # Ej: from app.models import vehiculo... si están dentro de app
+        try:
+            from app.models import vehiculo, dispositivo, ubicacion
+        except ImportError:
+             # Fallback si la estructura es plana
+             pass
+             
         await conn.run_sync(Base.metadata.create_all)
         logger.info("Base de datos inicializada correctamente")
 

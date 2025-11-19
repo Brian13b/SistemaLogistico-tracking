@@ -1,0 +1,13 @@
+app = "sistema-tracking-tcp"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[[services]]
+  internal_port = 5023
+  protocol = "tcp"
+
+  [[services.ports]]
+    port = 443
+    handlers = ["tls"]
