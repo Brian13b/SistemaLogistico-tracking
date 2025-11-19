@@ -34,12 +34,12 @@ class UbicacionService:
         try:
             # Verificar que el dispositivo existe
             dispositivo = await db.execute(
-                select(Dispositivo).where(Dispositivo.serial_number == datos_tracker.device_id)
+                select(Dispositivo).where(Dispositivo.imei == datos_tracker.device_id)
             )
             dispositivo = dispositivo.scalar_one_or_none()
             
             if not dispositivo:
-                raise ValueError(f"Dispositivo con serial {datos_tracker.device_id} no encontrado")
+                raise ValueError(f"Dispositivo con imei {datos_tracker.device_id} no encontrado")
             
             # Convertir datos del tracker al formato interno
             ubicacion_data = UbicacionCreate(
@@ -156,7 +156,7 @@ class UbicacionService:
             
             stmt = select(
                 Ubicacion,
-                Dispositivo.serial_number,
+                Dispositivo.imei,
                 Vehiculo.patente
             ).select_from(
                 Ubicacion.join(
@@ -171,10 +171,10 @@ class UbicacionService:
             result = await db.execute(stmt)
             ubicaciones_tiempo_real = []
             
-            for ubicacion, serial, patente in result:
+            for ubicacion, imei, patente in result:
                 ubicaciones_tiempo_real.append({
                     "ubicacion": ubicacion,
-                    "dispositivo_serial": serial,
+                    "dispositivo_imei": imei,
                     "vehiculo_patente": patente
                 })
             

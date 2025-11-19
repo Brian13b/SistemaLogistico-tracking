@@ -17,15 +17,15 @@ logger = logging.getLogger(__name__)
 # Dispositivos reales
 DISPOSITIVOS = [
     {
-        "serial_number": "36377367",
+        "imei": "36377367",
         "patente": "AA123CV"
     },
     {
-        "serial_number": "31313131",
+        "imei": "31313131",
         "patente": "AA234WE"
     },
     {
-        "serial_number": "38393939",
+        "imei": "38393939",
         "patente": "AG845FR"
     }
 ]
@@ -33,11 +33,11 @@ DISPOSITIVOS = [
 # Ruta Rosario -> Cordoba
 RUTA = [(-32.716774, -60.727609), (-31.466840, -64.101087)]
 
-def crear_paquete_login(serial_number: str) -> bytes:
+def crear_paquete_login(imei: str) -> bytes:
     """Crea paquete de login con formato correcto"""
-    device_id = serial_number[:8].ljust(8, '0')[:8]
+    device_id = imei[:8].ljust(8, '0')[:8]
     if len(device_id) != 8:
-        raise ValueError("El serial_number debe tener al menos 8 caracteres")
+        raise ValueError("El imei debe tener al menos 8 caracteres")
     
     return (
         bytes.fromhex("7878") +         # Header
@@ -48,10 +48,10 @@ def crear_paquete_login(serial_number: str) -> bytes:
         bytes.fromhex("0D0A")           # End
     )
 
-def crear_paquete_gps(serial_number: str, lat: float, lng: float, speed: float, course: float) -> bytes:
+def crear_paquete_gps(imei: str, lat: float, lng: float, speed: float, course: float) -> bytes:
     """Crea paquete GPS con formato compatible"""
     now = datetime.now(timezone.utc)
-    device_id = serial_number[:8].ljust(8, '0')[:8]
+    device_id = imei[:8].ljust(8, '0')[:8]
     
     # Convertir coordenadas
     lat_int = int(lat * 1000000)
@@ -80,7 +80,7 @@ def crear_paquete_gps(serial_number: str, lat: float, lng: float, speed: float, 
         bytes.fromhex("0D0A")                     # End
     )
 
-def simular_vehiculo(serial_number: str, patente: str, host: str, port: int):
+def simular_vehiculo(imei: str, patente: str, host: str, port: int):
     """Simula un vehiculo enviando datos realistas"""
     
     try:
@@ -100,7 +100,7 @@ def simular_vehiculo(serial_number: str, patente: str, host: str, port: int):
             s.connect((host, port))
             
             # Enviar login
-            login_pkt = crear_paquete_login(serial_number)
+            login_pkt = crear_paquete_login(imei)
             s.sendall(login_pkt)
             logger.info(f"✅ {patente}: Conectado a la nube y Login enviado")
             
@@ -124,7 +124,7 @@ def simular_vehiculo(serial_number: str, patente: str, host: str, port: int):
                 course = math.degrees(math.atan2(lng - last_lng, lat - last_lat)) % 360
                 
                 # Enviar paquete GPS
-                gps_pkt = crear_paquete_gps(serial_number, lat, lng, speed, course)
+                gps_pkt = crear_paquete_gps(imei, lat, lng, speed, course)
                 s.sendall(gps_pkt)
                 logger.info(f"📡 {patente}: Enviado -> Pos {lat:.4f},{lng:.4f} | Vel: {speed:.1f}")
                 
@@ -166,7 +166,7 @@ if __name__ == "__main__":
         thread = threading.Thread(
             target=simular_vehiculo,
             args=(
-                dispositivo["serial_number"],
+                dispositivo["imei"],
                 dispositivo["patente"],
                 HOST_NUBE,    # <--- Usamos la IP de la nube
                 PUERTO_NUBE   # <--- Puerto 5023

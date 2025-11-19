@@ -17,9 +17,9 @@ async def crear_dispositivo(
 ):
     """Crear un nuevo dispositivo"""
     
-    # Verificar si ya existe un dispositivo con ese serial
-    existing_dispositivo = await DispositivoService.obtener_dispositivo_por_serial(
-        db, dispositivo.serial_number
+    # Verificar si ya existe un dispositivo con ese imei
+    existing_dispositivo = await DispositivoService.obtener_dispositivo_por_imei(
+        db, dispositivo.imei
     )
     if existing_dispositivo:
         raise HTTPException(
@@ -73,13 +73,13 @@ async def obtener_dispositivo_completo(
         raise HTTPException(status_code=404, detail="Dispositivo no encontrado")
     return dispositivo
 
-@router.get("/serial/{serial_number}", response_model=DispositivoResponse)
-async def obtener_dispositivo_por_serial(
-    serial_number: str,
+@router.get("/imei/{imei}", response_model=DispositivoResponse)
+async def obtener_dispositivo_por_imei(
+    imei_number: str,
     db: AsyncSession = Depends(get_db)
 ):
     """Obtener dispositivo por número de serie"""
-    dispositivo = await DispositivoService.obtener_dispositivo_por_serial(db, serial_number)
+    dispositivo = await DispositivoService.obtener_dispositivo_por_imei(db, imei)
     if not dispositivo:
         raise HTTPException(status_code=404, detail="Dispositivo no encontrado")
     return dispositivo
@@ -109,16 +109,16 @@ async def actualizar_dispositivo(
     if not dispositivo_existente:
         raise HTTPException(status_code=404, detail="Dispositivo no encontrado")
     
-    # Si se está actualizando el serial, verificar que no exista otro igual
+    # Si se está actualizando el imei, verificar que no exista otro igual
     if (dispositivo_update.imei and 
         dispositivo_update.imei != dispositivo_existente.imei):
-        serial_existente = await DispositivoService.obtener_dispositivo_por_serial(
+        imei_existente = await DispositivoService.obtener_dispositivo_por_imei(
             db, dispositivo_update.imei
         )
-        if serial_existente:
+        if imei_existente:
             raise HTTPException(
                 status_code=400,
-                detail=f"Ya existe un dispositivo con el serial {dispositivo_update.imei}"
+                detail=f"Ya existe un dispositivo con el imei {dispositivo_update.imei}"
             )
     
     # Si se está asignando a un vehículo, verificar que exista

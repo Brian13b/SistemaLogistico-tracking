@@ -33,9 +33,9 @@ class DispositivoService:
         return result.scalar_one_or_none()
     
     @staticmethod
-    async def obtener_dispositivo_por_serial(db: AsyncSession, serial_number: str) -> Optional[Dispositivo]:
+    async def obtener_dispositivo_por_imei(db: AsyncSession, imei: str) -> Optional[Dispositivo]:
         """Obtener dispositivo por número de serie"""
-        stmt = select(Dispositivo).where(Dispositivo.imei == serial_number)
+        stmt = select(Dispositivo).where(Dispositivo.imei == imei)
         result = await db.execute(stmt)
         return result.scalar_one_or_none()
     

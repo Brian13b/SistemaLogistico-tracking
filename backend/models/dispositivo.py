@@ -20,4 +20,4 @@ class Dispositivo(Base):
     ubicaciones = relationship("Ubicacion", back_populates="dispositivo", cascade="all, delete-orphan")
     
     def __repr__(self):
-        return f"<Dispositivo(id={self.id}, serial={self.serial_number})>"
+        return f"<Dispositivo(id={self.id}, imei={self.imei})>"
