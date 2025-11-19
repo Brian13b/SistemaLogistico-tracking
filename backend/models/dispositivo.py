@@ -1,23 +1,24 @@
-from sqlalchemy import Column, String, ForeignKey, DateTime, Boolean
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from core.database import Base
-import uuid
 
 class Dispositivo(Base):
     __tablename__ = "dispositivos"
     
-    id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
+    # CAMBIO: Usamos Integer para coincidir con la DB (SERIAL)
+    id = Column(Integer, primary_key=True, index=True) 
+    
     imei = Column(String, unique=True, nullable=False, index=True)
+    marca = Column(String)  # Agregué marca porque estaba en tu SQL
     modelo = Column(String, default="CY06")
-    vehiculo_id = Column(String, ForeignKey("vehiculos.id"), nullable=True)
+    firmware_version = Column(String) # Agregado según tu SQL
     activo = Column(Boolean, default=True)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    created_at = Column("creado_en", DateTime(timezone=True), server_default=func.now())
+    last_seen = Column("ultima_vez_visto", DateTime(timezone=True)) 
     
-    # Relaciones
-    vehiculo = relationship("Vehiculo", back_populates="dispositivos")
     ubicaciones = relationship("Ubicacion", back_populates="dispositivo", cascade="all, delete-orphan")
-    
+    vehiculo = relationship("Vehiculo", back_populates="dispositivo", uselist=False)
+
     def __repr__(self):
         return f"<Dispositivo(id={self.id}, imei={self.imei})>"
