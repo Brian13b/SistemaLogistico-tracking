@@ -5,7 +5,7 @@ from models.ubicacion import Ubicacion
 from models.dispositivo import Dispositivo
 from models.vehiculo import Vehiculo
 from schemas.ubicacion_schema import UbicacionCreate, UbicacionTracker, RutaResponse
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List, Optional, Dict
 import logging
 
@@ -67,8 +67,10 @@ class UbicacionService:
     @staticmethod
     async def obtener_ubicacion_actual(db: AsyncSession, dispositivo_id: str) -> Optional[Ubicacion]:
         """Obtener la ubicación más reciente de un dispositivo"""
+        dispositivo_id_int = int(dispositivo_id)
+
         stmt = select(Ubicacion).where(
-            Ubicacion.dispositivo_id == dispositivo_id
+            Ubicacion.dispositivo_id == dispositivo_id_int
         ).order_by(desc(Ubicacion.timestamp)).limit(1)
         result = await db.execute(stmt)
         return result.scalar_one_or_none()
@@ -82,7 +84,9 @@ class UbicacionService:
         limit: int = 1000
     ) -> List[Ubicacion]:
         """Obtener ubicaciones de un dispositivo en un rango de fechas"""
-        stmt = select(Ubicacion).where(Ubicacion.dispositivo_id == dispositivo_id)
+        dispositivo_id_int = int(dispositivo_id)
+        
+        stmt = select(Ubicacion).where(Ubicacion.dispositivo_id == dispositivo_id_int)
         
         if fecha_inicio:
             stmt = stmt.where(Ubicacion.timestamp >= fecha_inicio)
