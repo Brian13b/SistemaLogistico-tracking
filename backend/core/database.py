@@ -15,6 +15,9 @@ elif original_url and original_url.startswith("postgresql://"):
 else:
     database_url = original_url
 
+if "?" in database_url:
+    database_url = database_url.split("?")[0]
+
 engine = create_async_engine(
     database_url, 
     echo=settings.DEBUG,
