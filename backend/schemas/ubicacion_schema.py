@@ -10,6 +10,7 @@ class UbicacionBase(BaseModel):
     rumbo: Optional[float] = Field(None, description="Rumbo en grados", ge=0, le=360)
     altitud: Optional[float] = Field(None, description="Altitud en metros")
     precision: Optional[float] = Field(None, description="Precisión en metros", ge=0)
+    timestamp: Optional[datetime] = Field(None, description="Marca de tiempo de la ubicación")
 
 class UbicacionCreate(UbicacionBase):
     pass

@@ -17,7 +17,13 @@ class UbicacionService:
     async def crear_ubicacion(db: AsyncSession, ubicacion_data: UbicacionCreate) -> Ubicacion:
         """Crear una nueva ubicación"""
         try:
-            nueva_ubicacion = Ubicacion(**ubicacion_data.model_dump())
+            data = ubicacion_data.model_dump()
+
+            if not data.get("timestamp"):
+                data["timestamp"] = datetime.now(timezone.utc)
+
+            nueva_ubicacion = Ubicacion(**data)
+
             db.add(nueva_ubicacion)
             await db.commit()
             await db.refresh(nueva_ubicacion)
@@ -49,7 +55,8 @@ class UbicacionService:
                 velocidad=datos_tracker.speed or 0.0,
                 rumbo=datos_tracker.course,
                 altitud=datos_tracker.altitude,
-                precision=datos_tracker.accuracy
+                precision=datos_tracker.accuracy,
+                timestamp=datos_tracker.timestamp
             )
             
             return await UbicacionService.crear_ubicacion(db, ubicacion_data)
