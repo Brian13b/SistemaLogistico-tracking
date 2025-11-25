@@ -22,7 +22,7 @@ DISPOSITIVOS = [
     },
     {
         "imei": "31313131",
-        "patente": "AA234WE"
+        "patente": "AB256FG"
     },
     {
         "imei": "38393939",
