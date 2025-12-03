@@ -3,14 +3,9 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from core.database import init_db
-from routes import (
-    tracker,
-    vehiculo_routes as vehiculos,
-    dispositivo_routes as dispositivos
-)
+from routes import (tracker, vehiculo_routes as vehiculos, dispositivo_routes as dispositivos)
 import logging
 
-# Configurar logging
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -28,7 +23,7 @@ app = FastAPI(
     redoc_url="/api/redoc"
 )
 
-# CORS (ajustar según necesidades)
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],

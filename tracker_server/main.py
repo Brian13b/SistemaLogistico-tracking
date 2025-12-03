@@ -28,7 +28,6 @@ class GT06Server:
                         logger.info(f"El cliente {peername} cerró la conexión")
                         break
 
-                    # Validación básica del paquete
                     if len(data) < 8 or data[0] != 0x78 or data[1] != 0x78:
                         logger.warning(f"Paquete no válido de {peername}")
                         break
@@ -36,7 +35,6 @@ class GT06Server:
                     protocol = data[3]
                     device_id = data[4:12].decode('ascii', errors='ignore').strip()
 
-                    # Verificar dispositivo permitido
                     if settings.ALLOWED_DEVICES and device_id not in settings.ALLOWED_DEVICES:
                         logger.warning(f"Dispositivo no autorizado: [oculto]")
                         break

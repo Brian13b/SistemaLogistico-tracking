@@ -21,7 +21,7 @@ class GT06ProtocolParser:
             raise ValueError("Paquete GPS demasiado corto")
 
         try:
-            # ID del dispositivo (8 bytes ASCII)
+            # ID del dispositivo (8 bytes)
             device_id = data[4:12].decode('ascii', errors='ignore').strip()
             if not device_id:
                 raise ValueError("Device ID vacío")
@@ -34,7 +34,7 @@ class GT06ProtocolParser:
             minute = data[16]
             second = data[17]
             
-            # Coordenadas (4 bytes cada una, big-endian, con signo)
+            # Coordenadas (4 bytes cada una)
             lat = struct.unpack('>i', data[18:22])[0] / 1000000.0
             lng = struct.unpack('>i', data[22:26])[0] / 1000000.0
             
@@ -44,13 +44,13 @@ class GT06ProtocolParser:
             
             # Velocidad y rumbo
             speed = data[26]
-            course = struct.unpack('>H', data[27:29])[0] % 360  # Normalizado 0-359
+            course = struct.unpack('>H', data[27:29])[0] % 360  # Normalizado (0-359)
             
             # Flags y precisión
             flags = data[29]
             accuracy = 3 if flags & 0x80 else 15  # Alta precisión si bit 7 está activo
             
-            # Altitud (2 bytes, en decímetros)
+            # Altitud (2 bytes)
             altitude = struct.unpack('>H', data[30:32])[0] / 10.0  # Convertir a metros
             
             return {

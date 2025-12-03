@@ -23,7 +23,6 @@ class UbicacionResponse(UbicacionBase):
         from_attributes = True
 
 class UbicacionTracker(BaseModel):
-    """Esquema específico para recibir datos CRUDOS del tracker CY06"""
     device_id: str = Field(..., description="ID del dispositivo tracker (IMEI/Serial)")
     lat: float = Field(..., description="Latitud", ge=-90, le=90)
     lng: float = Field(..., description="Longitud", ge=-180, le=180)
@@ -34,10 +33,9 @@ class UbicacionTracker(BaseModel):
     timestamp: Optional[datetime] = None
 
 class RutaResponse(BaseModel):
-    """Respuesta para consultas de rutas/recorridos"""
     dispositivo_id: int
     vehiculo_patente: Optional[str]
     ubicaciones: List[UbicacionResponse]
     total_puntos: int
-    distancia_total: Optional[float] = None  # en km
-    tiempo_total: Optional[float] = None  # en minutos
+    distancia_total: Optional[float] = None  
+    tiempo_total: Optional[float] = None  

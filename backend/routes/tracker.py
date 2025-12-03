@@ -11,22 +11,14 @@ from typing import List, Optional
 router = APIRouter(prefix="/tracker", tags=["tracker"])
 
 @router.post("/ubicacion", response_model=UbicacionResponse, status_code=201)
-async def crear_ubicacion(
-    ubicacion: UbicacionCreate,
-    db: AsyncSession = Depends(get_db)
-):
-    """Crear una nueva ubicación (uso interno)"""
+async def crear_ubicacion(ubicacion: UbicacionCreate, db: AsyncSession = Depends(get_db)):
     try:
         return await UbicacionService.crear_ubicacion(db, ubicacion)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error creando ubicación: {str(e)}")
 
 @router.post("/data", response_model=UbicacionResponse, status_code=201)
-async def recibir_datos_tracker(
-    datos_tracker: UbicacionTracker,
-    db: AsyncSession = Depends(get_db)
-):
-    """Endpoint principal para recibir datos del tracker CY06"""
+async def recibir_datos_tracker(datos_tracker: UbicacionTracker, db: AsyncSession = Depends(get_db)):
     try:
         return await UbicacionService.procesar_datos_tracker(db, datos_tracker)
     except ValueError as e:
@@ -35,11 +27,7 @@ async def recibir_datos_tracker(
         raise HTTPException(status_code=400, detail=f"Error procesando datos: {str(e)}")
 
 @router.get("/dispositivo/{dispositivo_id}/actual", response_model=UbicacionResponse)
-async def obtener_ubicacion_actual(
-    dispositivo_id: str,
-    db: AsyncSession = Depends(get_db)
-):
-    """Obtener la ubicación actual (más reciente) de un dispositivo"""
+async def obtener_ubicacion_actual(dispositivo_id: str, db: AsyncSession = Depends(get_db)):
     ubicacion = await UbicacionService.obtener_ubicacion_actual(db, dispositivo_id)
     if not ubicacion:
         raise HTTPException(
@@ -56,8 +44,6 @@ async def obtener_historial_ubicaciones(
     limit: int = Query(1000, ge=1, le=5000, description="Límite de registros"),
     db: AsyncSession = Depends(get_db)
 ):
-    """Obtener historial de ubicaciones de un dispositivo"""
-    
     if not fecha_inicio and not fecha_fin:
         fecha_fin = datetime.utcnow()
         fecha_inicio = fecha_fin - timedelta(hours=24)
@@ -80,9 +66,7 @@ async def obtener_recorrido_vehiculo(
     fecha_inicio: Optional[datetime] = Query(None, description="Fecha de inicio (ISO format)"),
     fecha_fin: Optional[datetime] = Query(None, description="Fecha de fin (ISO format)"),
     db: AsyncSession = Depends(get_db)
-):
-    """Obtener el recorrido completo de un vehículo"""
-    
+):  
     if not fecha_inicio and not fecha_fin:
         fecha_fin = datetime.utcnow()
         fecha_inicio = fecha_fin - timedelta(hours=24)
@@ -98,11 +82,7 @@ async def obtener_recorrido_vehiculo(
     return recorrido
 
 @router.get("/dispositivo/{dispositivo_id}/ultima-ubicacion", response_model=UbicacionResponse)
-async def obtener_ultima_ubicacion(
-    dispositivo_id: str,
-    db: AsyncSession = Depends(get_db)
-):
-    """Obtener la última ubicación conocida de un dispositivo"""
+async def obtener_ultima_ubicacion(dispositivo_id: str, db: AsyncSession = Depends(get_db)):
     ubicacion = await UbicacionService.obtener_ultima_ubicacion(db, dispositivo_id)
     if not ubicacion:
         raise HTTPException(

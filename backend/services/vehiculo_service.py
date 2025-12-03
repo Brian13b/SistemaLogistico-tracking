@@ -40,12 +40,7 @@ class VehiculoService:
         return result.scalar_one_or_none()
     
     @staticmethod
-    async def obtener_vehiculos(
-        db: AsyncSession, 
-        skip: int = 0, 
-        limit: int = 100,
-        activos_solo: bool = True
-    ) -> List[Vehiculo]:
+    async def obtener_vehiculos(db: AsyncSession, skip: int = 0, limit: int = 100,activos_solo: bool = True) -> List[Vehiculo]:
         """Obtener lista de vehículos"""
         stmt = select(Vehiculo)
         if activos_solo:
@@ -64,14 +59,9 @@ class VehiculoService:
         return result.scalar_one_or_none()
     
     @staticmethod
-    async def actualizar_vehiculo(
-        db: AsyncSession, 
-        vehiculo_id: str, 
-        vehiculo_data: VehiculoUpdate
-    ) -> Optional[Vehiculo]:
+    async def actualizar_vehiculo(db: AsyncSession, vehiculo_id: str, vehiculo_data: VehiculoUpdate) -> Optional[Vehiculo]:
         """Actualizar vehículo"""
         try:
-            # Filtrar solo campos no nulos
             update_data = {k: v for k, v in vehiculo_data.model_dump().items() if v is not None}
             if not update_data:
                 return await VehiculoService.obtener_vehiculo_por_id(db, vehiculo_id)

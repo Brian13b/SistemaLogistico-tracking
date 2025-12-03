@@ -6,13 +6,11 @@ from core.database import Base
 class Dispositivo(Base):
     __tablename__ = "dispositivos"
     
-    # CAMBIO: Usamos Integer para coincidir con la DB (SERIAL)
     id = Column(Integer, primary_key=True, index=True) 
-    
     imei = Column(String, unique=True, nullable=False, index=True)
-    marca = Column(String)  # Agregué marca porque estaba en tu SQL
+    marca = Column(String)
     modelo = Column(String, default="CY06")
-    firmware_version = Column(String) # Agregado según tu SQL
+    firmware_version = Column(String) 
     activo = Column(Boolean, default=True)
     created_at = Column("creado_en", DateTime(timezone=True), server_default=func.now())
     last_seen = Column("ultima_vez_visto", DateTime(timezone=True)) 

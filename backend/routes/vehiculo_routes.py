@@ -10,12 +10,7 @@ from typing import List
 router = APIRouter(prefix="/vehiculos", tags=["vehiculos"])
 
 @router.post("/", response_model=VehiculoResponse, status_code=201)
-async def crear_vehiculo(
-    vehiculo: VehiculoCreate,
-    db: AsyncSession = Depends(get_db)
-):
-    """Crear un nuevo vehículo"""
-    # Verificar si ya existe un vehículo con esa patente
+async def crear_vehiculo(vehiculo: VehiculoCreate, db: AsyncSession = Depends(get_db)):
     existing_vehiculo = await VehiculoService.obtener_vehiculo_por_patente(db, vehiculo.patente)
     if existing_vehiculo:
         raise HTTPException(
@@ -32,55 +27,35 @@ async def listar_vehiculos(
     activos_solo: bool = Query(True, description="Solo vehículos activos"),
     db: AsyncSession = Depends(get_db)
 ):
-    """Obtener lista de vehículos"""
     return await VehiculoService.obtener_vehiculos(db, skip, limit, activos_solo)
 
 @router.get("/{vehiculo_id}", response_model=VehiculoResponse)
-async def obtener_vehiculo(
-    vehiculo_id: str,
-    db: AsyncSession = Depends(get_db)
-):
-    """Obtener vehículo por ID"""
+async def obtener_vehiculo(vehiculo_id: str, db: AsyncSession = Depends(get_db)):
     vehiculo = await VehiculoService.obtener_vehiculo_por_id(db, vehiculo_id)
     if not vehiculo:
         raise HTTPException(status_code=404, detail="Vehículo no encontrado")
     return vehiculo
 
 @router.get("/{vehiculo_id}/completo", response_model=VehiculoWithDispositivos)
-async def obtener_vehiculo_completo(
-    vehiculo_id: str,
-    db: AsyncSession = Depends(get_db)
-):
-    """Obtener vehículo con sus dispositivos"""
+async def obtener_vehiculo_completo(vehiculo_id: str, db: AsyncSession = Depends(get_db)):
     vehiculo = await VehiculoService.obtener_vehiculo_con_dispositivos(db, vehiculo_id)
     if not vehiculo:
         raise HTTPException(status_code=404, detail="Vehículo no encontrado")
     return vehiculo
 
 @router.get("/patente/{patente}", response_model=VehiculoResponse)
-async def obtener_vehiculo_por_patente(
-    patente: str,
-    db: AsyncSession = Depends(get_db)
-):
-    """Obtener vehículo por patente"""
+async def obtener_vehiculo_por_patente(patente: str, db: AsyncSession = Depends(get_db)):
     vehiculo = await VehiculoService.obtener_vehiculo_por_patente(db, patente)
     if not vehiculo:
         raise HTTPException(status_code=404, detail="Vehículo no encontrado")
     return vehiculo
 
 @router.put("/{vehiculo_id}", response_model=VehiculoResponse)
-async def actualizar_vehiculo(
-    vehiculo_id: str,
-    vehiculo_update: VehiculoUpdate,
-    db: AsyncSession = Depends(get_db)
-):
-    """Actualizar vehículo"""
-    # Verificar que el vehículo existe
+async def actualizar_vehiculo(vehiculo_id: str, vehiculo_update: VehiculoUpdate, db: AsyncSession = Depends(get_db)):
     vehiculo_existente = await VehiculoService.obtener_vehiculo_por_id(db, vehiculo_id)
     if not vehiculo_existente:
         raise HTTPException(status_code=404, detail="Vehículo no encontrado")
     
-    # Si se está actualizando la patente, verificar que no exista otra igual
     if vehiculo_update.patente and vehiculo_update.patente != vehiculo_existente.patente:
         patente_existente = await VehiculoService.obtener_vehiculo_por_patente(db, vehiculo_update.patente)
         if patente_existente:
@@ -96,11 +71,7 @@ async def actualizar_vehiculo(
     return vehiculo_actualizado
 
 @router.delete("/{vehiculo_id}")
-async def eliminar_vehiculo(
-    vehiculo_id: str,
-    db: AsyncSession = Depends(get_db)
-):
-    """Eliminar vehículo (soft delete)"""
+async def eliminar_vehiculo(vehiculo_id: str, db: AsyncSession = Depends(get_db)):
     eliminado = await VehiculoService.eliminar_vehiculo(db, vehiculo_id)
     if not eliminado:
         raise HTTPException(status_code=404, detail="Vehículo no encontrado")

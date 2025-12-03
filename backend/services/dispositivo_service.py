@@ -40,12 +40,7 @@ class DispositivoService:
         return result.scalar_one_or_none()
     
     @staticmethod
-    async def obtener_dispositivos(
-        db: AsyncSession, 
-        skip: int = 0, 
-        limit: int = 100,
-        activos_solo: bool = True
-    ) -> List[Dispositivo]:
+    async def obtener_dispositivos(db: AsyncSession, skip: int = 0, limit: int = 100, activos_solo: bool = True) -> List[Dispositivo]:
         """Obtener lista de dispositivos"""
         stmt = select(Dispositivo)
         if activos_solo:
@@ -65,11 +60,7 @@ class DispositivoService:
         return result.scalars().all()
     
     @staticmethod
-    async def obtener_dispositivo_con_ubicaciones(
-        db: AsyncSession, 
-        dispositivo_id: str,
-        limit_ubicaciones: int = 100
-    ) -> Optional[Dispositivo]:
+    async def obtener_dispositivo_con_ubicaciones(db: AsyncSession, dispositivo_id: str, limit_ubicaciones: int = 100) -> Optional[Dispositivo]:
         """Obtener dispositivo con sus ubicaciones recientes"""
         stmt = select(Dispositivo).options(
             selectinload(Dispositivo.ubicaciones).limit(limit_ubicaciones)
@@ -78,14 +69,9 @@ class DispositivoService:
         return result.scalar_one_or_none()
     
     @staticmethod
-    async def actualizar_dispositivo(
-        db: AsyncSession, 
-        dispositivo_id: str, 
-        dispositivo_data: DispositivoUpdate
-    ) -> Optional[Dispositivo]:
+    async def actualizar_dispositivo(db: AsyncSession, dispositivo_id: str, dispositivo_data: DispositivoUpdate) -> Optional[Dispositivo]:
         """Actualizar dispositivo"""
         try:
-            # Filtrar solo campos no nulos
             update_data = {k: v for k, v in dispositivo_data.model_dump().items() if v is not None}
             if not update_data:
                 return await DispositivoService.obtener_dispositivo_por_id(db, dispositivo_id)
@@ -101,11 +87,7 @@ class DispositivoService:
             raise
     
     @staticmethod
-    async def asignar_a_vehiculo(
-        db: AsyncSession, 
-        dispositivo_id: str, 
-        vehiculo_id: str
-    ) -> Optional[Dispositivo]:
+    async def asignar_a_vehiculo(db: AsyncSession, dispositivo_id: str, vehiculo_id: str) -> Optional[Dispositivo]:
         """Asignar dispositivo a un vehículo"""
         try:
             stmt = update(Dispositivo).where(

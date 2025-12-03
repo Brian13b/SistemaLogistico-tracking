@@ -25,18 +25,15 @@ engine = create_async_engine(
     connect_args={"ssl": "require"}
 )
 
-# Session factory
 AsyncSessionLocal = async_sessionmaker(
     engine, 
     class_=AsyncSession, 
     expire_on_commit=False
 )
 
-# Base para los modelos
 Base = declarative_base()
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
-    """Dependency para obtener sesión de base de datos"""
     async with AsyncSessionLocal() as session:
         try:
             yield session
@@ -48,21 +45,15 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
             await session.close()
 
 async def init_db():
-    """Inicializar base de datos"""
     async with engine.begin() as conn:
-        # Importar todos los modelos para que SQLAlchemy los reconozca
-        # Asegúrate de que estos imports sean correctos según tu estructura de carpetas
-        # Ej: from app.models import vehiculo... si están dentro de app
         try:
-            from app.models import vehiculo, dispositivo, ubicacion
+            from models import vehiculo, dispositivo, ubicacion
         except ImportError:
-             # Fallback si la estructura es plana
              pass
              
         await conn.run_sync(Base.metadata.create_all)
         logger.info("Base de datos inicializada correctamente")
 
 async def close_db():
-    """Cerrar conexiones de base de datos"""
     await engine.dispose()
     logger.info("Conexiones de base de datos cerradas")

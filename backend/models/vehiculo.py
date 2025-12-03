@@ -6,9 +6,7 @@ from core.database import Base
 class Vehiculo(Base):
     __tablename__ = "vehiculos"
     
-    # CAMBIO: Integer para coincidir con DB
     id = Column(Integer, primary_key=True, index=True)
-    
     patente = Column(String, unique=True, nullable=False, index=True)
     marca = Column(String)
     modelo = Column(String)
@@ -19,7 +17,6 @@ class Vehiculo(Base):
     dispositivo_id = Column(Integer, ForeignKey("dispositivos.id"), nullable=False)
     created_at = Column("creado_en", DateTime(timezone=True), server_default=func.now())
 
-    # Relaciones
     dispositivo = relationship("Dispositivo", back_populates="vehiculo")
 
     def __repr__(self):

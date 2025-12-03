@@ -8,6 +8,7 @@ from schemas.ubicacion_schema import UbicacionCreate, UbicacionTracker, RutaResp
 from datetime import datetime, timedelta, timezone
 from typing import List, Optional, Dict
 import logging
+import math
 
 logger = logging.getLogger(__name__)
 
@@ -36,9 +37,8 @@ class UbicacionService:
     
     @staticmethod
     async def procesar_datos_tracker(db: AsyncSession, datos_tracker: UbicacionTracker) -> Ubicacion:
-        """Procesar datos del tracker CY06 y crear ubicación"""
+        """Procesar datos del tracker y crear ubicación"""
         try:
-            # Verificar que el dispositivo existe
             dispositivo = await db.execute(
                 select(Dispositivo).where(Dispositivo.imei == datos_tracker.device_id)
             )
@@ -47,7 +47,6 @@ class UbicacionService:
             if not dispositivo:
                 raise ValueError(f"Dispositivo con imei {datos_tracker.device_id} no encontrado")
             
-            # Convertir datos del tracker al formato interno
             ubicacion_data = UbicacionCreate(
                 dispositivo_id=dispositivo.id,
                 latitud=datos_tracker.lat,
@@ -76,13 +75,7 @@ class UbicacionService:
         return result.scalar_one_or_none()
     
     @staticmethod
-    async def obtener_ubicaciones_por_dispositivo(
-        db: AsyncSession,
-        dispositivo_id: str,
-        fecha_inicio: Optional[datetime] = None,
-        fecha_fin: Optional[datetime] = None,
-        limit: int = 1000
-    ) -> List[Ubicacion]:
+    async def obtener_ubicaciones_por_dispositivo(db: AsyncSession, dispositivo_id: str, fecha_inicio: Optional[datetime] = None, fecha_fin: Optional[datetime] = None, limit: int = 1000) -> List[Ubicacion]:
         """Obtener ubicaciones de un dispositivo en un rango de fechas"""
         dispositivo_id_int = int(dispositivo_id)
         
@@ -98,15 +91,9 @@ class UbicacionService:
         return result.scalars().all()
     
     @staticmethod
-    async def obtener_recorrido_vehiculo(
-        db: AsyncSession,
-        vehiculo_id: str,
-        fecha_inicio: Optional[datetime] = None,
-        fecha_fin: Optional[datetime] = None
-    ) -> Optional[RutaResponse]:
+    async def obtener_recorrido_vehiculo(db: AsyncSession, vehiculo_id: str, fecha_inicio: Optional[datetime] = None, fecha_fin: Optional[datetime] = None) -> Optional[RutaResponse]:
         """Obtener el recorrido completo de un vehículo"""
         try:
-            # Obtener vehículo con sus dispositivos
             vehiculo_stmt = select(Vehiculo).options(
                 selectinload(Vehiculo.dispositivos)
             ).where(Vehiculo.id == vehiculo_id)
@@ -116,7 +103,6 @@ class UbicacionService:
             if not vehiculo or not vehiculo.dispositivos:
                 return None
             
-            # Obtener ubicaciones de todos los dispositivos del vehículo
             dispositivos_ids = [d.id for d in vehiculo.dispositivos if d.activo]
             if not dispositivos_ids:
                 return None
@@ -132,7 +118,6 @@ class UbicacionService:
             result = await db.execute(stmt)
             ubicaciones = result.scalars().all()
             
-            # Calcular estadísticas básicas
             distancia_total = UbicacionService._calcular_distancia_recorrido(ubicaciones)
             tiempo_total = UbicacionService._calcular_tiempo_recorrido(ubicaciones)
             
@@ -149,15 +134,11 @@ class UbicacionService:
             raise
     
     @staticmethod
-    async def obtener_ubicaciones_tiempo_real(
-        db: AsyncSession,
-        minutos_atras: int = 5
-    ) -> List[Dict]:
+    async def obtener_ubicaciones_tiempo_real(db: AsyncSession, minutos_atras: int = 5) -> List[Dict]:
         """Obtener ubicaciones recientes para monitoreo en tiempo real"""
         try:
             tiempo_limite = datetime.utcnow() - timedelta(minutes=minutos_atras)
             
-            # Query compleja para obtener la última ubicación de cada dispositivo activo
             subquery = select(
                 Ubicacion.dispositivo_id,
                 func.max(Ubicacion.timestamp).label('max_timestamp')
@@ -199,8 +180,6 @@ class UbicacionService:
         """Calcular distancia total del recorrido usando fórmula de Haversine"""
         if len(ubicaciones) < 2:
             return None
-        
-        import math
         
         def haversine_distance(lat1, lon1, lat2, lon2):
             """Calcular distancia entre dos puntos en la Tierra"""

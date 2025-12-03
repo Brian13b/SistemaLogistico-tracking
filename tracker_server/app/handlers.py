@@ -7,13 +7,12 @@ from app.config import settings
 logger = logging.getLogger(__name__)
 
 async def send_to_backend(data: dict) -> bool:
-    """Envía datos al backend con manejo robusto de errores"""
+    """Envía datos al backend"""
     if not data or 'lat' not in data or 'lng' not in data:
         logger.debug("Datos incompletos ignorados")
         return False
 
     try:
-        # Preparar payload con formato consistente
         payload = {
             "device_id": data["device_id"],
             "lat": data["lat"],
@@ -25,18 +24,12 @@ async def send_to_backend(data: dict) -> bool:
             "timestamp": data.get("timestamp", datetime.now(timezone.utc).isoformat())
         }
 
-        # Construir headers correctamente
         headers = {
             "Content-Type": "application/json"
         }
         
-        # Solo añadir Authorization si API_KEY existe y no está vacía
         if settings.API_KEY and settings.API_KEY.strip():
             headers["Authorization"] = f"Bearer {settings.API_KEY.strip()}"
-
-        # logger.debug(f"Enviando al backend - URL: {settings.BACKEND_URL}")
-        # logger.debug(f"Headers: {headers}")
-        # logger.debug(f"Payload: {payload}")
 
         async with aiohttp.ClientSession() as session:
             for attempt in range(3):
