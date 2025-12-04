@@ -48,7 +48,7 @@ class GT06Server:
                         ack = self.parser.create_ack(device_id, data[8])
                         writer.write(ack)
                         
-                    elif protocol in (0x10, 0x12, 0x16, 0x22):  # GPS/Alarm
+                    elif protocol in (0x10, 0x12, 0x16, 0x22): #GPS
                         packet = self.parser.parse_gps(data)
                         if packet:
                             backend_data = {
