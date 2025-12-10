@@ -12,10 +12,13 @@ class Vehiculo(Base):
     modelo = Column(String)
     year = Column("año", Integer) 
     tipo_motor = Column(String)
+    capacidad_combustible = Column(Float)
     tipo_vehiculo = Column(String)
+    odometro_inicial = Column(Float)
+    velocidad_maxima_permitida = Column(Float)
     activo = Column(Boolean, default=True)
-    dispositivo_id = Column(Integer, ForeignKey("dispositivos.id"), nullable=False)
     created_at = Column("creado_en", DateTime(timezone=True), server_default=func.now())
+    dispositivo_id = Column(Integer, ForeignKey("dispositivos.id"), nullable=False)
 
     dispositivo = relationship("Dispositivo", back_populates="vehiculo")
 
