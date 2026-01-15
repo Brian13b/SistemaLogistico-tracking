@@ -1,43 +1,42 @@
-# 🛰️ Módulo de rastreo en tiempo real para el sistema de gestión de flotas.  
+# 🛰️ Módulo de Tracking GPS en Tiempo Real
 
-Este repositorio forma parte del ecosistema de **Sistema Logistico** y está dedicado al rastreo de vehículos en tiempo real. Incluye un servidor **TCP** que recibe datos directamente desde dispositivos **GPS tracker** instalados en los vehículos, y un backend construido con **FastAPI** que gestiona, almacena y expone esa información para el resto del sistema.
-
----
-
-🌟 **¿Qué hace este módulo?**  
-- Recibe datos de ubicación y estado de los vehículos en tiempo real mediante un servidor **TCP**.  
-- Procesa y envía esa información al backend para su almacenamiento y análisis.  
-- Expone una API para que el frontend pueda acceder a los datos y mostrarlos en mapas o reportes.
+El corazón del monitoreo del **Sistema Logístico**. Este módulo híbrido combina un servidor de sockets de alto rendimiento para hardware IoT con una API REST para el consumo de datos.
 
 ---
 
-🔧 **Características principales**  
-- 📡 **Servidor TCP** para recibir datos en tiempo real desde trackers GPS.  
-- 🗺️ Gestión de datos de ubicación: latitud, longitud, velocidad, dirección, estado, kilómetros recorridos y más.  
-- 🔄 Integración directa con el backend para guardar datos en la base de datos.  
-- 🌐 API REST con FastAPI para consulta y visualización desde el frontend.
+## 🌟 Funcionalidades Principales
+- **Servidor TCP Asíncrono:** Escucha activa de tramas de datos provenientes de dispositivos GPS.
+- **Decodificación de Tramas:** Parsea cadenas de datos (latitud, longitud, velocidad, motor on/off).
+- **API de Consulta:** Endpoints para obtener la última ubicación conocida o historial de recorridos.
+- **Vinculación:** Asocia identificadores de hardware (IMEI) con vehículos del sistema.
 
 ---
 
-📚 **Flujo del sistema**  
-1. 📶 Tracker GPS → se conecta al servidor TCP.  
-2. 📡 El servidor recibe y procesa los datos del vehículo.  
-3. 💾 El backend guarda esta información en la base de datos.  
-4. 🌍 El frontend obtiene los datos desde la API para visualizarlos en el mapa y generar reportes.
+## 📚 Flujo de Datos
+1.  **Dispositivo GPS:** Envía trama string vía TCP -> `Host:Puerto`.
+2.  **Servidor TCP:** - Acepta la conexión.
+    - Parsea la trama.
+    - Inserta el registro en la base de datos `tracking_db`.
+3.  **Frontend:** Consulta `GET /ubicaciones/{id}` a través del Gateway.
+4.  **Mapa:** Renderiza el marcador en tiempo real usando Leaflet.
 
 ---
 
-🛡️ **Tecnologías Usadas**  
-- 🖥️ Lenguaje: Python
-- ⚡ Framework: FastAPI (API REST)
-- 📡 Protocolo de comunicación: TCP socket server
-- 🗄️ Base de datos: PostgreSQL 
+## 🛡️ Stack Tecnológico
+- **Servidor Sockets:** Python `asyncio`.
+- **API:** FastAPI.
+- **Base de Datos:** PostgreSQL.
+- **Protocolo:** TCP (Receptor) / HTTP (Consulta).
 
 ---
 
-🌱 **Futuras actualizaciones**  
-- 🔔 Notificaciones automáticas ante eventos críticos o cambios de estado.  
-- 📈 Mejora en el análisis histórico de recorridos.  
-- 📲 Visualización móvil optimizada para tracking en campo.
+## 🌱 Futuras Actualizaciones
+- [ ] **WebSockets:** Reemplazar el *polling* del frontend por un canal de WebSockets para movimiento fluido en vivo.
+- [ ] **Geocercas (Geofencing):** Alertas si un vehículo sale de una zona delimitada.
+- [ ] **Reproducción de Historial:** "Player" para ver la animación de un recorrido pasado.
+- [ ] **Soporte Multi-protocolo:** Adaptadores para diferentes marcas de GPS (Teltonika, Ruptela, etc.).
 
 ---
+
+## 👤 Autor
+**Brian Battauz** - [GitHub](https://github.com/Brian13b)
