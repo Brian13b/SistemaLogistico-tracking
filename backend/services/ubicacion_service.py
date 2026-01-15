@@ -4,7 +4,7 @@ from sqlalchemy.orm import selectinload
 from models.ubicacion import Ubicacion
 from models.dispositivo import Dispositivo
 from models.vehiculo import Vehiculo
-from schemas.ubicacion_schema import UbicacionCreate, UbicacionTracker, RutaResponse
+from schemas.ubicacion_schema import UbicacionCreate, UbicacionResponse, UbicacionTracker, RutaResponse
 from datetime import datetime, timedelta, timezone
 from typing import List, Optional, Dict
 import logging
@@ -39,28 +39,61 @@ class UbicacionService:
     async def procesar_datos_tracker(db: AsyncSession, datos_tracker: UbicacionTracker) -> Ubicacion:
         """Procesar datos del tracker y crear ubicación"""
         try:
-            dispositivo = await db.execute(
-                select(Dispositivo).where(Dispositivo.imei == datos_tracker.device_id)
-            )
-            dispositivo = dispositivo.scalar_one_or_none()
+            stmt = select(Dispositivo).where(Dispositivo.imei == datos_tracker.device_id)
+            result = await db.execute(stmt)
+            dispositivo = result.scalar_one_or_none()
             
             if not dispositivo:
-                raise ValueError(f"Dispositivo con imei {datos_tracker.device_id} no encontrado")
+                logger.warning(f"⚠️ IMEI desconocido intentando reportar: {datos_tracker.device_id}")
+                raise ValueError(f"Dispositivo {datos_tracker.device_id} no encontrado")
             
-            ubicacion_data = UbicacionCreate(
-                dispositivo_id=dispositivo.id,
-                latitud=datos_tracker.lat,
-                longitud=datos_tracker.lng,
-                velocidad=datos_tracker.speed or 0.0,
-                rumbo=datos_tracker.course,
-                altitud=datos_tracker.altitude,
-                precision=datos_tracker.accuracy,
-                timestamp=datos_tracker.timestamp
-            )
+            dispositivo.last_seen = datos_tracker.timestamp or datetime.now(timezone.utc)
             
-            return await UbicacionService.crear_ubicacion(db, ubicacion_data)
+            stmt_last = select(Ubicacion).where(
+                Ubicacion.dispositivo_id == dispositivo.id
+            ).order_by(desc(Ubicacion.timestamp)).limit(1)
+            
+            last_location = (await db.execute(stmt_last)).scalar_one_or_none()
+            
+            guardar_nuevo = True
+            
+            if last_location:
+                distancia_km = UbicacionService._calcular_distancia_puntos(
+                    last_location.latitud, last_location.longitud,
+                    datos_tracker.lat, datos_tracker.lng
+                )
+                tiempo_diff_seg = (datos_tracker.timestamp - last_location.timestamp).total_seconds()
+                
+                if distancia_km < 0.03 and tiempo_diff_seg < 300:
+                    
+                    if datos_tracker.speed == 0 and last_location.velocidad > 0:
+                        guardar_nuevo = True
+                        logger.info(f"🛑 Vehículo {dispositivo.imei} se detuvo. Guardando evento.")
+                    else:
+                        guardar_nuevo = False
+
+            if guardar_nuevo:
+                ubicacion_data = UbicacionCreate(
+                    dispositivo_id=dispositivo.id,
+                    latitud=datos_tracker.lat,
+                    longitud=datos_tracker.lng,
+                    velocidad=datos_tracker.speed or 0.0,
+                    rumbo=datos_tracker.course,
+                    altitud=datos_tracker.altitude,
+                    precision=datos_tracker.accuracy,
+                    timestamp=datos_tracker.timestamp
+                )
+                nueva_ubicacion = await UbicacionService.crear_ubicacion(db, ubicacion_data)
+                
+                await db.commit() 
+                return nueva_ubicacion
+            else:
+                await db.commit()
+                return last_location
+
         except Exception as e:
             logger.error(f"Error procesando datos del tracker: {e}")
+            await db.rollback()
             raise
     
     @staticmethod
@@ -137,7 +170,7 @@ class UbicacionService:
     async def obtener_ubicaciones_tiempo_real(db: AsyncSession, minutos_atras: int = 5) -> List[Dict]:
         """Obtener ubicaciones recientes para monitoreo en tiempo real"""
         try:
-            tiempo_limite = datetime.utcnow() - timedelta(minutes=minutos_atras)
+            tiempo_limite = datetime.now(timezone.utc) - timedelta(minutes=minutos_atras)
             
             subquery = select(
                 Ubicacion.dispositivo_id,
@@ -164,13 +197,16 @@ class UbicacionService:
             ubicaciones_tiempo_real = []
             
             for ubicacion, imei, patente in result:
+                ubicacion_data = UbicacionResponse.model_validate(ubicacion).model_dump()
+                
                 ubicaciones_tiempo_real.append({
-                    "ubicacion": ubicacion,
+                    "ubicacion": ubicacion_data, 
                     "dispositivo_imei": imei,
                     "vehiculo_patente": patente
                 })
             
             return ubicaciones_tiempo_real
+            
         except Exception as e:
             logger.error(f"Error obteniendo ubicaciones en tiempo real: {e}")
             raise
@@ -212,4 +248,16 @@ class UbicacionService:
         tiempo_fin = ubicaciones[-1].timestamp
         diferencia = tiempo_fin - tiempo_inicio
         
-        return round(diferencia.total_seconds() / 60, 2)  # Convertir a minutos
+        return round(diferencia.total_seconds() / 60, 2)
+    
+    @staticmethod
+    def _calcular_distancia_puntos(lat1, lon1, lat2, lon2):
+        """Calcula distancia Haversine entre dos puntos (retorna KM)"""
+        import math
+        R = 6371
+        dlat = math.radians(lat2 - lat1)
+        dlon = math.radians(lon2 - lon1)
+        a = (math.sin(dlat/2) * math.sin(dlat/2) + 
+             math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dlon/2) * math.sin(dlon/2))
+        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+        return R * c

@@ -6,7 +6,7 @@ from schemas.ubicacion_schema import (
     UbicacionCreate, UbicacionResponse, UbicacionTracker, RutaResponse
 )
 from datetime import datetime, timedelta
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 
 router = APIRouter(prefix="/tracker", tags=["tracker"])
 
@@ -26,6 +26,14 @@ async def recibir_datos_tracker(datos_tracker: UbicacionTracker, db: AsyncSessio
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error procesando datos: {str(e)}")
 
+@router.get("/tiempo-real", response_model=List[Dict[str, Any]])
+async def obtener_ubicaciones_live(minutos_atras: int = Query(5, description="Ventana de tiempo en minutos"), db: AsyncSession = Depends(get_db)):
+    try:
+        return await UbicacionService.obtener_ubicaciones_tiempo_real(db, minutos_atras)
+    except Exception as e:
+        print(f"Error tiempo real: {e}")
+        return []
+    
 @router.get("/dispositivo/{dispositivo_id}/actual", response_model=UbicacionResponse)
 async def obtener_ubicacion_actual(dispositivo_id: str, db: AsyncSession = Depends(get_db)):
     ubicacion = await UbicacionService.obtener_ubicacion_actual(db, dispositivo_id)

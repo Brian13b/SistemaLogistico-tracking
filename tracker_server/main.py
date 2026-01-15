@@ -32,6 +32,8 @@ class GT06Server:
                         logger.warning(f"Paquete no válido de {peername}")
                         break
 
+                    logger.info(f"📥 RAW DATA RECIBIDA ({data.hex()}")
+
                     protocol = data[3]
                     device_id = data[4:12].decode('ascii', errors='ignore').strip()
 
