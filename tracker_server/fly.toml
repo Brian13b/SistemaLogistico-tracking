@@ -9,5 +9,9 @@ primary_region = "iad"
   protocol = "tcp"
 
   [[services.ports]]
+    port = 5023       
+    handlers = []
+
+  [[services.ports]]
     port = 443
-    handlers = ["tls"]
+    handlers = ["tls", "http"]
